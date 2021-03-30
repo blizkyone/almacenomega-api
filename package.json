@@ -7,7 +7,9 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon -r dotenv/config src/index.js"
+    "dev": "nodemon -r dotenv/config src/index.js",
+    "data:import": "node src/seeder",
+    "data:destroy": "node src/seeder -d"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
