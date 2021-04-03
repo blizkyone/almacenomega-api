@@ -28,11 +28,17 @@ const productSchema = mongoose.Schema(
          required: true,
          ref: 'User',
       },
+      createdBy: {
+         type: mongoose.Schema.Types.ObjectId,
+         required: true,
+         ref: 'User',
+      },
+      createdAt: String,
       aosku: {
          type: String,
          sparse: true,
       },
-      state: String,
+      condition: String,
       price: {
          type: Number,
          default: 0,
