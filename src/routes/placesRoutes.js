@@ -5,6 +5,7 @@ import {
    getAddress,
    requestPickup,
    pickupRequestHistory,
+   pickupTrackingList,
 } from '../controllers/placesControllers.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -14,5 +15,6 @@ router
    .route('/request-pickup')
    .get(protect, pickupRequestHistory)
    .post(protect, requestPickup)
+router.route('/pickup-tracking').get(protect, pickupTrackingList)
 
 export default router

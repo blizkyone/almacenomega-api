@@ -39,16 +39,43 @@ const getAddress = asyncHandler(async (req, res) => {
 })
 
 // @desc    get last pickup requests
-// @route   GET /api/places/request-pickup?pageNumber
+// @route   GET /api/places/request-pickup?pageNumber=PAGENUMBER&filter=FILTER
+// @access  Private
+const pickupTrackingList = asyncHandler(async (req, res) => {
+   const pageSize = 10
+   const page = Number(req.query.pageNumber) || 1
+
+   const count = await Pickup.countDocuments({
+      user: req.user.id,
+      //   isDelivered: false,
+   })
+
+   const pickupTrackingList = await Pickup.find({
+      user: req.user.id,
+      //   isDelivered: false,
+   })
+      .limit(pageSize)
+      .skip(pageSize * (page - 1))
+      .sort('-createdAt')
+
+   res.json({ pickupTrackingList, page, pages: Math.ceil(count / pageSize) })
+})
+
+// @desc    get last pickup requests
+// @route   GET /api/places/request-pickup?pageNumber=PAGENUMBER&filter=FILTER
 // @access  Private
 const pickupRequestHistory = asyncHandler(async (req, res) => {
    const pageSize = 10
    const page = Number(req.query.pageNumber) || 1
 
    const count = await Pickup.countDocuments({ user: req.user.id })
-   const history = await Pickup.find({ user: req.user.id })
+
+   const history = await Pickup.find({
+      user: req.user.id,
+   })
       .limit(pageSize)
       .skip(pageSize * (page - 1))
+      .sort('-createdAt')
 
    res.json({ history, page, pages: Math.ceil(count / pageSize) })
 })
@@ -95,4 +122,10 @@ const requestPickup = asyncHandler(async (req, res) => {
    }
 })
 
-export { placeAutocomplete, getAddress, requestPickup, pickupRequestHistory }
+export {
+   placeAutocomplete,
+   getAddress,
+   requestPickup,
+   pickupRequestHistory,
+   pickupTrackingList,
+}

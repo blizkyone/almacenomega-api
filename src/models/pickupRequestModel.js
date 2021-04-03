@@ -35,6 +35,11 @@ const destinationSchema = mongoose.Schema(
          type: String,
          enum: ['Solicitado', 'En camino', 'Recibido', 'Almacenado'],
       },
+      isDelivered: {
+         type: Boolean,
+         required: true,
+         default: false,
+      },
    },
    {
       timestamps: true,
