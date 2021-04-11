@@ -16,6 +16,7 @@ import userRoutes from './routes/userRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
 import placesRoutes from './routes/placesRoutes.js'
+import routeRoutes from './routes/routeRoutes.js'
 
 // dotenv.config()
 
@@ -35,6 +36,7 @@ app.use('/api/users', userRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/upload', uploadRoutes)
 app.use('/api/places', placesRoutes)
+app.use('/api/routes', routeRoutes)
 
 // app.get('/api/config/paypal', (req, res) =>
 //   res.send(process.env.PAYPAL_CLIENT_ID)
@@ -66,12 +68,15 @@ if (app.get('env') === 'development') {
 
    const sslKeyPath = path.join(
       os.homedir(),
-      'Desktop/Desarrollo/ssl/localhost.key'
+      'Desktop/Desarrollo/ssl/localhost-key.pem'
    )
    const sslCertPath = path.join(
       os.homedir(),
-      'Desktop/Desarrollo/ssl/localhost.cert'
+      'Desktop/Desarrollo/ssl/localhost-cert.pem'
    )
+
+   // const sslKeyPath = '../.cert/key.pem'
+   // const sslCertPath = '../.cert/cert.pem'
 
    const sslserver = https.createServer(
       {

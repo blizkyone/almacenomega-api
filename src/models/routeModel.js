@@ -10,7 +10,7 @@ const routeSchema = mongoose.Schema(
       route: [
          {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Pickup',
+            ref: 'Order',
          },
       ],
    },

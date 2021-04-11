@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler'
 import axios from 'axios'
 import Pickup from '../models/pickupRequestModel.js'
+import Order from '../models/orderModel.js'
 
 // @desc    autocomplete places
 // @route   GET /api/places/autocomplete?input=${input}
@@ -38,21 +39,68 @@ const getAddress = asyncHandler(async (req, res) => {
    }
 })
 
-// @desc    get last pickup requests
+// @desc    get list of all submitted pickup requests
+// @route   GET /api/places/request-pickup?pageNumber=PAGENUMBER
+// @access  Private
+const getAllPendingPickupRequests = asyncHandler(async (req, res) => {
+   const pageSize = 10
+   const page = Number(req.query.pageNumber) || 1
+
+   const count = await Order.countDocuments({
+      status: 'Solicitado',
+   })
+
+   const pickupRequests = await Order.find({
+      status: 'Solicitado',
+   })
+      .limit(pageSize)
+      .skip(pageSize * (page - 1))
+      .sort('createdAt')
+
+   // const count = await Pickup.countDocuments({
+   //    status: 'Solicitado',
+   // })
+
+   // const pickupRequests = await Pickup.find({
+   //    status: 'Solicitado',
+   // })
+   //    .limit(pageSize)
+   //    .skip(pageSize * (page - 1))
+   //    .sort('createdAt')
+
+   res.json({ pickupRequests, page, pages: Math.ceil(count / pageSize) })
+})
+
+// @desc    get list of pending pickup requests
 // @route   GET /api/places/request-pickup?pageNumber=PAGENUMBER&filter=FILTER
 // @access  Private
 const pickupTrackingList = asyncHandler(async (req, res) => {
    const pageSize = 10
    const page = Number(req.query.pageNumber) || 1
 
-   const count = await Pickup.countDocuments({
+   // const count = await Pickup.countDocuments({
+   //    user: req.user.id,
+   //    //   isDelivered: false,
+   // })
+
+   // const pickupTrackingList = await Pickup.find({
+   //    user: req.user.id,
+   //    //   isDelivered: false,
+   // })
+   //    .limit(pageSize)
+   //    .skip(pageSize * (page - 1))
+   //    .sort('-createdAt')
+
+   const count = await Order.countDocuments({
       user: req.user.id,
-      //   isDelivered: false,
+      isDelivered: false,
+      type: 'pickup',
    })
 
-   const pickupTrackingList = await Pickup.find({
+   const pickupTrackingList = await Order.find({
       user: req.user.id,
-      //   isDelivered: false,
+      isDelivered: false,
+      type: 'pickup',
    })
       .limit(pageSize)
       .skip(pageSize * (page - 1))
@@ -68,14 +116,23 @@ const pickupRequestHistory = asyncHandler(async (req, res) => {
    const pageSize = 10
    const page = Number(req.query.pageNumber) || 1
 
-   const count = await Pickup.countDocuments({ user: req.user.id })
+   const count = await Order.countDocuments({ user: req.user.id })
 
-   const history = await Pickup.find({
+   const history = await Order.find({
       user: req.user.id,
    })
       .limit(pageSize)
       .skip(pageSize * (page - 1))
       .sort('-createdAt')
+
+   // const count = await Pickup.countDocuments({ user: req.user.id })
+
+   // const history = await Pickup.find({
+   //    user: req.user.id,
+   // })
+   //    .limit(pageSize)
+   //    .skip(pageSize * (page - 1))
+   //    .sort('-createdAt')
 
    res.json({ history, page, pages: Math.ceil(count / pageSize) })
 })
@@ -84,31 +141,34 @@ const pickupRequestHistory = asyncHandler(async (req, res) => {
 // @route   POST /api/places/request-pickup
 // @access  Private
 const requestPickup = asyncHandler(async (req, res) => {
-   const {
-      lat,
-      lng,
-      address,
-      handling,
-      comments,
-      person,
-      phone,
-      name,
-   } = req.body
+   const { lat, lng, address, handling, comments, person, name } = req.body
 
    const location = {
       type: 'Point',
       coordinates: [parseFloat(lng), parseFloat(lat)],
    }
 
-   const request = new Pickup({
+   // const request = new Pickup({
+   //    user: req.user.id,
+   //    name,
+   //    location,
+   //    address,
+   //    handling,
+   //    comments,
+   //    person,
+   //    phone,
+   //    status: 'Solicitado',
+   // })
+
+   const request = new Order({
       user: req.user.id,
       name,
+      type: 'pickup',
       location,
       address,
       handling,
       comments,
       person,
-      phone,
       status: 'Solicitado',
    })
 
@@ -128,4 +188,5 @@ export {
    requestPickup,
    pickupRequestHistory,
    pickupTrackingList,
+   getAllPendingPickupRequests,
 }
