@@ -1,29 +1,8 @@
 import mongoose from 'mongoose'
 
-const reviewSchema = mongoose.Schema(
-   {
-      rating: { type: Number, required: true },
-      title: { type: String, required: true },
-      comment: { type: String, required: true },
-      user: {
-         type: mongoose.Schema.Types.ObjectId,
-         required: true,
-         ref: 'User',
-      },
-      product: {
-         type: mongoose.Schema.Types.ObjectId,
-         required: true,
-         ref: 'Product',
-      },
-   },
-   {
-      timestamps: true,
-   }
-)
-
 const productSchema = mongoose.Schema(
    {
-      user: {
+      owner: {
          type: mongoose.Schema.Types.ObjectId,
          required: true,
          ref: 'User',
@@ -33,32 +12,24 @@ const productSchema = mongoose.Schema(
          required: true,
          ref: 'User',
       },
-      createdAt: String,
+      createdAt: {
+         type: Date,
+         Default: Date.now(),
+      },
       aosku: {
          type: String,
          sparse: true,
       },
-      condition: String,
-      price: {
-         type: Number,
-         default: 0,
-      },
-      qty: {
-         type: Number,
-         required: true,
-         default: 0,
-      },
+      barcode: String,
       name: {
          type: String,
          required: true,
       },
+      brand: String,
       description: {
          type: String,
       },
       categories: [String],
-      brand: String,
-      images: [String],
-      barcode: String,
       color: String,
       size: String,
       type: String,
@@ -72,7 +43,27 @@ const productSchema = mongoose.Schema(
       weight: { type: Number, required: true, default: 0 },
       area: { type: Number, required: true, default: 0 },
       volume: { type: Number, required: true, default: 0 },
-      reviews: [reviewSchema],
+      prductIsNew: {
+         type: Boolean,
+         default: false,
+      },
+      condition: String,
+      price: {
+         type: Number,
+         default: 0,
+      },
+      qty: {
+         type: Number,
+         required: true,
+         default: 0,
+      },
+      images: [String],
+      reviews: [
+         {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Review',
+         },
+      ],
       rating: {
          type: Number,
          required: true,
@@ -90,8 +81,8 @@ const productSchema = mongoose.Schema(
 )
 
 productSchema.pre('save', async function (next) {
-   this.area = this.lenth * this.width
-   this.volume = this.lenth * this.width * this.height
+   this.area = (this.length * this.width) / 100000
+   this.volume = (this.length * this.width * this.height) / 1000000
 })
 
 const Product = mongoose.model('Product', productSchema)

@@ -1,6 +1,6 @@
 import asyncHandler from 'express-async-handler'
 import axios from 'axios'
-import Pickup from '../models/pickupRequestModel.js'
+// import Pickup from '../models/pickupRequestModel.js'
 import Order from '../models/orderModel.js'
 
 // @desc    autocomplete places

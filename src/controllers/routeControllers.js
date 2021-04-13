@@ -1,5 +1,5 @@
 import asyncHandler from 'express-async-handler'
-import Pickup from '../models/pickupRequestModel.js'
+// import Pickup from '../models/pickupRequestModel.js'
 import Order from '../models/orderModel.js'
 import Route from '../models/routeModel.js'
 import asyncForEach from '../utils/asyncForEach.js'
