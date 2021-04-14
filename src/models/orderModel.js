@@ -47,18 +47,19 @@ const orderSchema = mongoose.Schema(
       },
       comments: String,
       person: String,
-
       orderItems: [
          {
             name: { type: String, required: true },
-            qty: { type: Number, required: true },
-            image: { type: String, required: true },
-            price: { type: Number, required: true },
-            product: {
+            brand: { type: String, required: true },
+            description: { type: String, required: true },
+            condition: { type: String },
+            price: { type: Number, required: true, default: 0 },
+            item: {
                type: mongoose.Schema.Types.ObjectId,
                required: true,
-               ref: 'Product',
+               ref: 'Item',
             },
+            qty: { type: Number, required: true },
          },
       ],
       status: {

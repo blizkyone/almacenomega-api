@@ -1,5 +1,81 @@
 import asyncHandler from 'express-async-handler'
 import Order from '../models/orderModel.js'
+import Item from '../models/itemModel.js'
+
+// @desc    Remove item from an order during a pickup request
+// @route   PUT /api/orders/:id/pickup
+// @access  Private
+const deletePickupItem = asyncHandler(async (req, res) => {
+   const { order, item } = req.body
+   console.log(req.body)
+
+   let currentOrder = await Order.findByIdAndUpdate(
+      order,
+      {
+         $pull: { orderItems: { item } },
+      },
+      { new: true }
+   )
+   await Item.findByIdAndDelete(item)
+
+   res.status(202).json(currentOrder)
+})
+
+// @desc    Add item to an order during a pickup request
+// @route   POST /api/orders/:id/pickup
+// @access  Private
+const addPickupItem = asyncHandler(async (req, res) => {
+   const {
+      order,
+      barcode,
+      name,
+      description,
+      categories,
+      brand,
+      condition,
+      qty,
+      width,
+      height,
+      length,
+      weight,
+   } = req.body
+
+   let currentOrder = await Order.findById(order)
+
+   const item = new Item({
+      owner: currentOrder.user,
+      createdBy: req.user._id,
+      barcode,
+      name,
+      description,
+      categories,
+      brand,
+      condition,
+      qty,
+      width,
+      height,
+      length,
+      weight,
+   })
+
+   const newItem = await item.save()
+
+   // add new product to current order
+   let newOrderItem = {
+      name,
+      brand,
+      description,
+      condition,
+      item: newItem._id,
+      qty,
+   }
+
+   currentOrder = await currentOrder.updateOne({
+      $addToSet: { orderItems: newOrderItem },
+   })
+
+   res.status(201).json(currentOrder)
+})
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -46,7 +122,7 @@ const getOrderById = asyncHandler(async (req, res) => {
       'name email'
    )
 
-   console.log(order)
+   // console.log(order)
 
    if (order) {
       res.json(order)
@@ -123,4 +199,6 @@ export {
    updateOrderToDelivered,
    getMyOrders,
    getOrders,
+   addPickupItem,
+   deletePickupItem,
 }

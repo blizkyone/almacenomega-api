@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler'
 import Product from '../models/productModel.js'
+import Order from '../models/orderModel.js'
 
 // @desc    Fetch all products
 // @route   GET /api/products
@@ -56,18 +57,41 @@ const deleteProduct = asyncHandler(async (req, res) => {
    }
 })
 
-// @desc    Create a product
+// @desc    Create a product in the pickupOrder flow
 // @route   POST /api/products
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
+   const {
+      barcode,
+      name,
+      description,
+      categories,
+      brand,
+      condition,
+      qty,
+      width,
+      height,
+      length,
+      weight,
+   } = req.body
+
    const product = new Product({
-      user: req.body.user,
-      name: 'New Product',
-      condition: 'New',
-      qty: 0,
+      createdBy: req.user._id,
+      barcode,
+      name,
+      description,
+      categories,
+      brand,
+      condition,
+      qty,
+      width,
+      height,
+      length,
+      weight,
    })
 
    const createdProduct = await product.save()
+
    res.status(201).json(createdProduct)
 })
 

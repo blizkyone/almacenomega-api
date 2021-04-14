@@ -2,11 +2,6 @@ import mongoose from 'mongoose'
 
 const productSchema = mongoose.Schema(
    {
-      owner: {
-         type: mongoose.Schema.Types.ObjectId,
-         required: true,
-         ref: 'User',
-      },
       createdBy: {
          type: mongoose.Schema.Types.ObjectId,
          required: true,
@@ -43,10 +38,6 @@ const productSchema = mongoose.Schema(
       weight: { type: Number, required: true, default: 0 },
       area: { type: Number, required: true, default: 0 },
       volume: { type: Number, required: true, default: 0 },
-      prductIsNew: {
-         type: Boolean,
-         default: false,
-      },
       condition: String,
       price: {
          type: Number,
@@ -81,8 +72,8 @@ const productSchema = mongoose.Schema(
 )
 
 productSchema.pre('save', async function (next) {
-   this.area = (this.length * this.width) / 100000
-   this.volume = (this.length * this.width * this.height) / 1000000
+   this.area = ((this.length * this.width) / 100000) * 1.5
+   this.volume = ((this.length * this.width * this.height) / 1000000) * 1.5
 })
 
 const Product = mongoose.model('Product', productSchema)
