@@ -13,6 +13,7 @@ const routeSchema = mongoose.Schema(
             ref: 'Order',
          },
       ],
+      isFinished: Boolean,
    },
    {
       timestamps: true,

@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler'
 import Order from '../models/orderModel.js'
 import Item from '../models/itemModel.js'
+import { deleteItemPictures } from '../config/s3.js'
 
 // @desc    Remove item from an order during a pickup request
 // @route   PUT /api/orders/:id/pickup
@@ -17,8 +18,10 @@ const deletePickupItem = asyncHandler(async (req, res) => {
       { new: true }
    )
    await Item.findByIdAndDelete(item)
+   await deleteItemPictures(item)
 
    res.status(202).json(currentOrder)
+   // res.status(202).json({ deletedPictures })
 })
 
 // @desc    Add item to an order during a pickup request
@@ -117,10 +120,12 @@ const addOrderItems = asyncHandler(async (req, res) => {
 // @route   GET /api/orders/:id
 // @access  Private
 const getOrderById = asyncHandler(async (req, res) => {
-   const order = await Order.findById(req.params.id).populate(
-      'user',
-      'name email'
-   )
+   const order = await Order.findById(req.params.id)
+      .populate('user', 'name email')
+      .populate({
+         path: 'orderItems',
+         populate: { path: 'item', model: 'Item', select: 'images' },
+      })
 
    // console.log(order)
 
@@ -130,6 +135,19 @@ const getOrderById = asyncHandler(async (req, res) => {
       res.status(404)
       throw new Error('Order not found')
    }
+})
+
+// @desc    Edit Order -> change status
+// @route   PUT /api/orders/:id
+// @access  Private
+const editOrder = asyncHandler(async (req, res) => {
+   const updates = Object.keys(req.body)
+
+   const updateOrder = await Order.findById(req.params.id)
+   updates.forEach((update) => (updateOrder[update] = req.body[update]))
+   await updateUser.save()
+
+   res.status(200).send(updateOrder)
 })
 
 // @desc    Update order to paid
@@ -164,9 +182,7 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
    const order = await Order.findById(req.params.id)
 
    if (order) {
-      order.isDelivered = true
-      order.deliveredAt = Date.now()
-
+      order.status = 'Entregado'
       const updatedOrder = await order.save()
 
       res.json(updatedOrder)
@@ -195,6 +211,7 @@ const getOrders = asyncHandler(async (req, res) => {
 export {
    addOrderItems,
    getOrderById,
+   editOrder,
    updateOrderToPaid,
    updateOrderToDelivered,
    getMyOrders,
