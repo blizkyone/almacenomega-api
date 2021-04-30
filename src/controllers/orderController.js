@@ -70,6 +70,7 @@ const addPickupItem = asyncHandler(async (req, res) => {
       description,
       condition,
       item: newItem._id,
+      barcode: Math.round(Math.random() * 89999 + 10000).toString(),
       qty,
    }
 
@@ -120,14 +121,19 @@ const addOrderItems = asyncHandler(async (req, res) => {
 // @route   GET /api/orders/:id
 // @access  Private
 const getOrderById = asyncHandler(async (req, res) => {
-   const order = await Order.findById(req.params.id)
+   let order = await Order.findById(req.params.id)
       .populate('user', 'name email')
       .populate({
          path: 'orderItems',
          populate: { path: 'item', model: 'Item', select: 'images' },
       })
+      .lean()
 
-   // console.log(order)
+   let validated = order.orderItems.every((item) => {
+      return item.item.images.length > 0
+   })
+
+   order = { ...order, validated }
 
    if (order) {
       res.json(order)

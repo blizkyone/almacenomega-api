@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler'
 import Product from '../models/productModel.js'
 import Order from '../models/orderModel.js'
+import Item from '../models/itemModel.js'
 
 // @desc    Fetch all products
 // @route   GET /api/products
@@ -24,7 +25,7 @@ const getProducts = asyncHandler(async (req, res) => {
    // .skip(pageSize * (page - 1))
 
    //  res.json({ products, page, pages: Math.ceil(count / pageSize) })
-   const products = await Product.find({ user: req.user.id })
+   const products = await Item.find({ owner: req.user.id })
    res.json(products)
 })
 

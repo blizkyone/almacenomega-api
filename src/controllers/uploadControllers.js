@@ -61,7 +61,7 @@ const deleteItemPicture = asyncHandler(async (req, res) => {
       },
       { new: true }
    )
-   console.log(response)
+   // console.log(response)
    res.send(`photo ${req.query.key} deleted`)
 })
 

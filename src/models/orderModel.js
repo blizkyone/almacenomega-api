@@ -59,6 +59,7 @@ const orderSchema = mongoose.Schema(
                required: true,
                ref: 'Item',
             },
+            barcode: String,
             qty: { type: Number, required: true },
          },
       ],
