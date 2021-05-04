@@ -25,7 +25,7 @@ const getProducts = asyncHandler(async (req, res) => {
    // .skip(pageSize * (page - 1))
 
    //  res.json({ products, page, pages: Math.ceil(count / pageSize) })
-   const products = await Item.find({ owner: req.user.id })
+   const products = await Item.find({ owner: req.user.id }).sort('name')
    res.json(products)
 })
 

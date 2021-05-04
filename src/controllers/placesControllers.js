@@ -93,13 +93,13 @@ const pickupTrackingList = asyncHandler(async (req, res) => {
 
    const count = await Order.countDocuments({
       user: req.user.id,
-      isDelivered: false,
+      // isDelivered: false,
       type: 'pickup',
    })
 
    const pickupTrackingList = await Order.find({
       user: req.user.id,
-      isDelivered: false,
+      // isDelivered: false,
       type: 'pickup',
    })
       .limit(pageSize)

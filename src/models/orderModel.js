@@ -50,7 +50,7 @@ const orderSchema = mongoose.Schema(
       orderItems: [
          {
             name: { type: String, required: true },
-            brand: { type: String, required: true },
+            brand: { type: String },
             description: { type: String, required: true },
             condition: { type: String },
             price: { type: Number, required: true, default: 0 },

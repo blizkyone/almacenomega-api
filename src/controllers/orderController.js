@@ -30,12 +30,12 @@ const deletePickupItem = asyncHandler(async (req, res) => {
 const addPickupItem = asyncHandler(async (req, res) => {
    const {
       order,
-      barcode,
+      // barcode,
       name,
       description,
-      categories,
+      // categories,
       brand,
-      condition,
+      // condition,
       qty,
       width,
       height,
@@ -48,12 +48,12 @@ const addPickupItem = asyncHandler(async (req, res) => {
    const item = new Item({
       owner: currentOrder.user,
       createdBy: req.user._id,
-      barcode,
+      // barcode,
       name,
       description,
-      categories,
+      // categories,
       brand,
-      condition,
+      // condition,
       qty,
       width,
       height,
@@ -68,7 +68,7 @@ const addPickupItem = asyncHandler(async (req, res) => {
       name,
       brand,
       description,
-      condition,
+      // condition,
       item: newItem._id,
       barcode: Math.round(Math.random() * 89999 + 10000).toString(),
       qty,
@@ -98,7 +98,6 @@ const addOrderItems = asyncHandler(async (req, res) => {
    if (orderItems && orderItems.length === 0) {
       res.status(400)
       throw new Error('No order items')
-      return
    } else {
       const order = new Order({
          orderItems,
@@ -189,6 +188,8 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 
    if (order) {
       order.status = 'Entregado'
+      order.isDelivered = true
+      order.deliveredAt = Date.now()
       const updatedOrder = await order.save()
 
       res.json(updatedOrder)
