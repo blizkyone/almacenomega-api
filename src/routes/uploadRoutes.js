@@ -6,6 +6,9 @@ import {
    uploadItemPicture,
    getItemPictures,
    deleteItemPicture,
+   uploadOrderReceiptPicture,
+   getOrderReceiptPicture,
+   deleteOrderReceiptPicture,
 } from '../controllers/uploadControllers.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -37,5 +40,10 @@ router
    .post(protect, admin, upload.single('file'), uploadItemPicture)
    .get(protect, admin, getItemPictures)
    .delete(protect, admin, deleteItemPicture)
+router
+   .route('/orderImage')
+   .post(protect, admin, upload.single('file'), uploadOrderReceiptPicture)
+   .get(protect, admin, getOrderReceiptPicture)
+   .delete(protect, admin, deleteOrderReceiptPicture)
 
 export default router

@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler'
 import Order from '../models/orderModel.js'
 import Item from '../models/itemModel.js'
 import { deleteItemPictures } from '../config/s3.js'
+import asyncForEach from '../utils/asyncForEach.js'
 
 // @desc    Remove item from an order during a pickup request
 // @route   PUT /api/orders/:id/pickup
@@ -190,6 +191,15 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
       order.status = 'Entregado'
       order.isDelivered = true
       order.deliveredAt = Date.now()
+
+      if (order.type === 'delivery') {
+         asyncForEach(order.orderItems, async (item) => {
+            const storedItem = await Item.findById(item.item, 'qty')
+            storedItem['qty'] = storedItem.qty - item.qty
+            await storedItem.save()
+         })
+      }
+
       const updatedOrder = await order.save()
 
       res.json(updatedOrder)
