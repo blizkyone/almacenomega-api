@@ -54,6 +54,7 @@ const itemSchema = mongoose.Schema(
          default: 0,
       },
       images: [String],
+      inTransit: Boolean,
       // reviews: [
       //    {
       //       type: mongoose.Schema.Types.ObjectId,

@@ -4,8 +4,10 @@ import {
    placeAutocomplete,
    getAddress,
    requestPickup,
+   requestDelivery,
+   deliveryRequestHistory,
    pickupRequestHistory,
-   pickupTrackingList,
+   trackingList,
    getAllPendingPickupRequests,
 } from '../controllers/placesControllers.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
@@ -16,7 +18,11 @@ router
    .route('/request-pickup')
    .get(protect, pickupRequestHistory)
    .post(protect, requestPickup)
-router.route('/pickup-tracking').get(protect, pickupTrackingList)
+router
+   .route('/request-delivery')
+   .get(protect, deliveryRequestHistory)
+   .post(protect, requestDelivery)
+router.route('/tracking').get(protect, trackingList)
 router
    .route('/pickup-requests')
    .get(protect, admin, getAllPendingPickupRequests)
