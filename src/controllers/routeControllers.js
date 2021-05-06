@@ -4,30 +4,37 @@ import Order from '../models/orderModel.js'
 import Route from '../models/routeModel.js'
 import asyncForEach from '../utils/asyncForEach.js'
 
-// @desc    Create a new route
+// @desc    Create a new route or modify an existing one
 // @route   POST /api/routes/my-pickup-route
 // @access  Private, Admin
 // @body    route: [Pickup._id]
 const createPickupRoute = asyncHandler(async (req, res) => {
    let route = req.body.route
 
+   let newRoute
+
    let existingRoute = await Route.findOne({
       createdBy: req.user.id,
       isFinished: false,
    })
-   if (existingRoute) throw new Error('Routa pendiente')
 
-   const newRoute = new Route({
-      createdBy: req.user.id,
-      route,
-   })
+   if (existingRoute) {
+      newRoute = await existingRoute.update({
+         $addToSet: { route: { $each: route } },
+      })
+   } else {
+      newRoute = new Route({
+         createdBy: req.user.id,
+         route,
+      })
+      await newRoute.save()
+   }
 
    asyncForEach(route, async (destination) => {
       await Order.findByIdAndUpdate(destination, { status: 'En camino' })
    })
 
-   const savedRoute = await newRoute.save()
-   res.status(201).send(savedRoute)
+   res.status(201).send(newRoute)
 })
 
 // @desc    Get my pickup route
@@ -71,11 +78,18 @@ const deleteMyPickupRoute = asyncHandler(async (req, res) => {
 // @route   GET /api/routes/active
 // @access  Private, Admin
 const getActiveRoutes = asyncHandler(async (req, res) => {
-   let activeRoutes = await Route.find({ isFinished: false }).populate(
-      'createdBy',
-      'name'
-   )
+   let activeRoutes = await Route.find({ isFinished: false })
+      .populate('createdBy', 'name')
+      .populate('route', 'status')
+      .lean()
+
+   activeRoutes = activeRoutes.map((route) => ({
+      ...route,
+      completed: route.route.every((x) => x.status === 'Entregado'),
+   }))
+
    if (activeRoutes) {
+      // console.log(activeRoutes)
       res.json(activeRoutes)
    } else {
       throw new Error('Sin Ruta pendiente')
@@ -83,7 +97,7 @@ const getActiveRoutes = asyncHandler(async (req, res) => {
 })
 
 // @desc    Get all non finished routes
-// @route   GET /api/routes/active
+// @route   GET /api/routes/items/:route
 // @access  Private, Admin
 const getRouteItems = asyncHandler(async (req, res) => {
    let route = await Route.findById(req.params.route).populate('route')
@@ -91,11 +105,14 @@ const getRouteItems = asyncHandler(async (req, res) => {
    if (!route) throw new Error('No route found')
 
    let routeItems = []
+
    route.route.forEach((order) => {
-      order.orderItems.forEach((item) => {
-         let modItem = { ...item.toObject(), received: false }
-         routeItems.push(modItem)
-      })
+      if (order.type === 'pickup') {
+         order.orderItems.forEach((item) => {
+            let modItem = { ...item.toObject(), received: false }
+            routeItems.push(modItem)
+         })
+      }
    })
 
    // console.log(routeItems)
@@ -125,6 +142,30 @@ const finishRoute = asyncHandler(async (req, res) => {
    }
 })
 
+// @desc    Remove order from route
+// @route   POST /api/routes/:route/remove-order
+// @access  Private, Admin
+const removeOrderFromRoute = asyncHandler(async (req, res) => {
+   const { order } = req.body
+
+   let myRoute = await Route.findOneAndUpdate(
+      {
+         createdBy: req.user.id,
+         isFinished: false,
+      },
+      {
+         $pull: { route: order },
+      }
+   )
+
+   if (myRoute) {
+      await Order.findByIdAndUpdate(order, { status: 'Solicitado' })
+      res.status(204).json(myRoute)
+   } else {
+      throw new Error('Ruta no encontrada')
+   }
+})
+
 export {
    createPickupRoute,
    getMyPickupRoute,
@@ -132,4 +173,5 @@ export {
    getActiveRoutes,
    getRouteItems,
    finishRoute,
+   removeOrderFromRoute,
 }
