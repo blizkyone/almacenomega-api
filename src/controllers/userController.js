@@ -29,10 +29,10 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   GET /api/users/logout
 // @access  Private
 const userLogout = asyncHandler(async (req, res) => {
-   // req.user.tokens = req.user.tokens.filter((token) => {
-   //    return token.token != req.token
-   // })
-   req.user.tokens = []
+   req.user.tokens = req.user.tokens.filter((token) => {
+      return token.token !== req.token
+   })
+   // req.user.tokens = []
    await req.user.save()
 
    res.send(`User ${req.user.username} logged out`)

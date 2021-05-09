@@ -253,7 +253,7 @@ const requestDelivery = asyncHandler(async (req, res) => {
    let newRequest = await request.save()
 
    asyncForEach(orderItems, async (item) => {
-      await Item.findByIdAndUpdate(item.item, { inTransit: true })
+      await Item.findByIdAndUpdate(item.item, { $inc: { qty: -item.qty } })
    })
 
    if (newRequest) {

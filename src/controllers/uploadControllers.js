@@ -16,6 +16,7 @@ import Item from '../models/itemModel.js'
 // @access  Private, Admin
 const uploadItemPicture = asyncHandler(async (req, res) => {
    let buffer
+   // console.log(req)
    if (req.file) {
       buffer = await sharp(req.file.buffer)
          .resize({ width: 1080, height: 1080 })

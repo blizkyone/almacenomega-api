@@ -9,7 +9,7 @@ import asyncForEach from '../utils/asyncForEach.js'
 // @access  Private
 const deletePickupItem = asyncHandler(async (req, res) => {
    const { order, item } = req.body
-   console.log(req.body)
+   // console.log(req.body)
 
    let currentOrder = await Order.findByIdAndUpdate(
       order,
@@ -86,35 +86,37 @@ const addPickupItem = asyncHandler(async (req, res) => {
 // @route   POST /api/orders
 // @access  Private
 const addOrderItems = asyncHandler(async (req, res) => {
-   const {
-      orderItems,
-      shippingAddress,
-      paymentMethod,
-      itemsPrice,
-      taxPrice,
-      shippingPrice,
-      totalPrice,
-   } = req.body
+   console.log(req.body.orderItems)
+   res.send(true)
+   // const {
+   //    orderItems,
+   //    shippingAddress,
+   //    paymentMethod,
+   //    itemsPrice,
+   //    taxPrice,
+   //    shippingPrice,
+   //    totalPrice,
+   // } = req.body
 
-   if (orderItems && orderItems.length === 0) {
-      res.status(400)
-      throw new Error('No order items')
-   } else {
-      const order = new Order({
-         orderItems,
-         user: req.user._id,
-         shippingAddress,
-         paymentMethod,
-         itemsPrice,
-         taxPrice,
-         shippingPrice,
-         totalPrice,
-      })
+   // if (orderItems && orderItems.length === 0) {
+   //    res.status(400)
+   //    throw new Error('No order items')
+   // } else {
+   //    const order = new Order({
+   //       orderItems,
+   //       user: req.user._id,
+   //       shippingAddress,
+   //       paymentMethod,
+   //       itemsPrice,
+   //       taxPrice,
+   //       shippingPrice,
+   //       totalPrice,
+   //    })
 
-      const createdOrder = await order.save()
+   //    const createdOrder = await order.save()
 
-      res.status(201).json(createdOrder)
-   }
+   //    res.status(201).json(createdOrder)
+   // }
 })
 
 // @desc    Get order by ID
@@ -125,18 +127,21 @@ const getOrderById = asyncHandler(async (req, res) => {
       .populate('user', 'name email')
       .populate({
          path: 'orderItems',
-         populate: { path: 'item', model: 'Item', select: 'images' },
+         populate: {
+            path: 'item',
+            model: 'Item',
+            select: 'images length width height weight',
+         },
       })
       .lean()
 
-   let validated = order.orderItems.every((item) => {
-      return item.item.images.length > 0
-   })
-
-   order = { ...order, validated }
-
    if (order) {
-      res.json(order)
+      let validated = order.orderItems.every((item) => {
+         return item.item.images.length > 0
+      })
+      const orderToSend = { ...order, validated }
+      // orderToSend.orderItems.forEach((item) => console.log(item))
+      res.json(orderToSend)
    } else {
       res.status(404)
       throw new Error('Order not found')
