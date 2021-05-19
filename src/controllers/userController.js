@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler'
 import generateToken from '../utils/generateToken.js'
 import User from '../models/userModel.js'
+import stripe from '../config/stripe.js'
 
 // @desc    Auth user & get token
 // @route   POST /api/users/login
@@ -16,9 +17,12 @@ const authUser = asyncHandler(async (req, res) => {
          _id: user._id,
          name: user.name,
          email: user.email,
+         stripeId: user.stripeId,
+         paymentMethod: user.paymentMethod,
          isAdmin: user.isAdmin,
          token,
       })
+      // res.json(user)
    } else {
       res.status(401)
       throw new Error('Invalid email or password')
@@ -71,11 +75,14 @@ const registerUser = asyncHandler(async (req, res) => {
       throw new Error('User already exists')
    }
 
+   const customer = await stripe.customers.create()
+
    const user = await User.create({
       name,
       username,
       email,
       password,
+      stripeId: customer.id,
    })
 
    if (user) {
@@ -122,11 +129,16 @@ const updateUserProfile = asyncHandler(async (req, res) => {
    const user = await User.findById(req.user._id)
 
    if (user) {
-      user.name = req.body.name || user.name
-      user.email = req.body.email || user.email
-      if (req.body.password) {
-         user.password = req.body.password
-      }
+      const updates = Object.keys(req.body)
+      updates.forEach((update) => {
+         user[update] = req.body[update]
+         return
+      })
+      // user.name = req.body.name || user.name
+      // user.email = req.body.email || user.email
+      // if (req.body.password) {
+      //    user.password = req.body.password
+      // }
 
       const updatedUser = await user.save()
 
@@ -135,7 +147,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
          name: updatedUser.name,
          email: updatedUser.email,
          isAdmin: updatedUser.isAdmin,
-         token: generateToken(updatedUser._id),
+         stripeId: updatedUser.stripeId,
+         paymentMethod: updatedUser.paymentMethod,
       })
    } else {
       res.status(404)

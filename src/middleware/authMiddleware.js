@@ -4,6 +4,7 @@ import User from '../models/userModel.js'
 
 const protect = asyncHandler(async (req, res, next) => {
    let token
+   // console.log(req.headers.authorization)
 
    if (
       req.headers.authorization &&
@@ -23,7 +24,7 @@ const protect = asyncHandler(async (req, res, next) => {
          if (!user) {
             throw new Error('User not found')
          }
-
+         // console.log(user)
          req.token = token
          req.user = user
          next()

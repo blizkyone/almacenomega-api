@@ -2,4 +2,5 @@
 /node_modules
 src/seederData
 src/seeder.js
+src/createStripeCustomer.js
 .cert

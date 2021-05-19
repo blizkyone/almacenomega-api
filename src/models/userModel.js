@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import moment from 'moment'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
@@ -21,6 +22,23 @@ const userSchema = mongoose.Schema(
       password: {
          type: String,
          required: true,
+      },
+      maxStorage: {
+         type: Number,
+         required: true,
+         default: 0,
+      },
+      currentStorage: {
+         type: Number,
+         required: true,
+         default: 0,
+      },
+      stripeId: String,
+      paymentMethod: String,
+      billingDay: {
+         type: String,
+         required: true,
+         default: moment().format('D'),
       },
       isAdmin: {
          type: Boolean,
