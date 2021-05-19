@@ -75,7 +75,7 @@ const registerUser = asyncHandler(async (req, res) => {
       throw new Error('User already exists')
    }
 
-   const customer = await stripe.customers.create()
+   const customer = await stripe.customers.create({ name, email })
 
    const user = await User.create({
       name,
