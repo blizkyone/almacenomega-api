@@ -5,19 +5,21 @@ import stripe from '../config/stripe.js'
 // @route   POST /api/stripe/new-payment-intent
 // @access  Public
 const newCardPaymentIntent = asyncHandler(async (req, res) => {
-   const { amount } = req.body
+   // const { amount } = req.body
 
-   const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: 'mxn',
+   // const paymentIntent = await stripe.paymentIntents.create({
+   //    amount,
+   //    currency: 'mxn',
+   //    customer: req.user.stripeId,
+   // })
+
+   const paymentIntent = await stripe.setupIntents.create({
       customer: req.user.stripeId,
    })
 
    //    Send publishable key and PaymentIntent details to client
    res.send({
-      publicKey: process.env.STRIPE_TEST_PUBLIC_KEY,
       clientSecret: paymentIntent.client_secret,
-      id: paymentIntent.id,
    })
 })
 

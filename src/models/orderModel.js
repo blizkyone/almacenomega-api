@@ -79,11 +79,8 @@ const orderSchema = mongoose.Schema(
          type: String,
          //  required: true,
       },
-      paymentResult: {
-         id: { type: String },
-         status: { type: String },
-         update_time: { type: String },
-         email_address: { type: String },
+      chargeId: {
+         type: String,
       },
       taxPrice: {
          type: Number,
@@ -99,6 +96,12 @@ const orderSchema = mongoose.Schema(
          type: Number,
          //  required: true,
          default: 0.0,
+      },
+      paymentStatus: {
+         type: String,
+         required: true,
+         enum: ['pendiente', 'fallido', 'completado'],
+         default: 'pendiente',
       },
       isPaid: {
          type: Boolean,

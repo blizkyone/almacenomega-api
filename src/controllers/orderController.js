@@ -3,6 +3,8 @@ import Order from '../models/orderModel.js'
 import Item from '../models/itemModel.js'
 import { deleteItemPictures } from '../config/s3.js'
 import asyncForEach from '../utils/asyncForEach.js'
+import stripe from '../config/stripe.js'
+import User from '../models/userModel.js'
 
 // @desc    Remove item from an order during a pickup request
 // @route   PUT /api/orders/:id/pickup
@@ -186,24 +188,79 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
    }
 })
 
-// @desc    Update order to delivered
+// @desc    Update order to delivered and charge customer if it is a pickup or transport order
 // @route   GET /api/orders/:id/deliver
 // @access  Private/Admin
 const updateOrderToDelivered = asyncHandler(async (req, res) => {
-   const order = await Order.findById(req.params.id)
+   const order = await Order.findById(req.params.id).populate(
+      'user',
+      'stripeId paymentMethod'
+   )
+   // console.log(order.user)
 
    if (order) {
       order.status = 'Entregado'
       order.isDelivered = true
       order.deliveredAt = Date.now()
 
-      if (order.type === 'delivery') {
-         asyncForEach(order.orderItems, async (item) => {
-            const storedItem = await Item.findById(item.item, 'qty')
-            storedItem['qty'] = storedItem.qty - item.qty
-            await storedItem.save()
-         })
+      if (order.type !== 'purchase') {
+         let amount
+
+         switch (order.type) {
+            case 'delivery':
+               amount = 5000
+               break
+            case 'pickup':
+               amount = 15000
+               break
+            default:
+               break
+         }
+         // console.log(amount)
+         try {
+            const charge = await stripe.paymentIntents.create({
+               amount,
+               currency: 'mxn',
+               customer: order.user.stripeId,
+               payment_method: order.user.paymentMethod,
+               off_session: true,
+               confirm: true,
+               description: 'Cargo por orden de recolección',
+            })
+            console.log(charge)
+
+            order.isPaid = true
+            order.paymentStatus = 'completado'
+            order.paidAt = Date.now()
+            order.chargeId = charge.id
+            order.paymentMethod = charge.paymentMethod
+            order.totalPrice = charge.amount
+            order.taxPrice = Math.round(charge.amount / 1.16)
+            order.shippingPrice =
+               charge.amount - Math.round(charge.amount / 1.16)
+         } catch (error) {
+            console.log(error.raw)
+
+            order.paymentStatus = 'fallido'
+            order.chargeId = error.raw.charge
+
+            await stripe.paymentMethods.detach(order.user.paymentMethod)
+
+            await User.findByIdAndUpdate(order.user._id, {
+               paymentMethod: 'fallo',
+            })
+
+            // throw new Error(error.raw.message)
+         }
       }
+
+      // if (order.type === 'delivery') {
+      //    asyncForEach(order.orderItems, async (item) => {
+      //       const storedItem = await Item.findById(item.item, 'qty')
+      //       storedItem['qty'] = storedItem.qty - item.qty
+      //       await storedItem.save()
+      //    })
+      // }
 
       const updatedOrder = await order.save()
 
