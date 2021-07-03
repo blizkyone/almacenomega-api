@@ -26,8 +26,20 @@ const getProducts = asyncHandler(async (req, res) => {
 
    //  res.json({ products, page, pages: Math.ceil(count / pageSize) })
    let products = await Item.find({ owner: req.user.id }).sort('name')
+
    products = products.filter((x) => x.qty > 0)
-   res.json(products)
+
+   let qty = products.length
+
+   let area =
+      products.length === 0
+         ? 0
+         : products
+              .map((x) => x.area)
+              .reduce((acc, current) => acc + current)
+              .toFixed(2)
+
+   res.json({ products, qty, area })
 })
 
 // @desc    Fetch single product
@@ -101,15 +113,8 @@ const createProduct = asyncHandler(async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 const updateProduct = asyncHandler(async (req, res) => {
-   const {
-      name,
-      price,
-      description,
-      image,
-      brand,
-      category,
-      countInStock,
-   } = req.body
+   const { name, price, description, image, brand, category, countInStock } =
+      req.body
 
    const product = await Product.findById(req.params.id)
 

@@ -43,7 +43,7 @@ const orderSchema = mongoose.Schema(
       address: String,
       handling: {
          type: String,
-         enum: ['Ligero', 'Pesado'],
+         enum: ['Ligero', 'Pesado', 'Especial'],
       },
       comments: String,
       person: String,
