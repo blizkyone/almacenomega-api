@@ -221,16 +221,8 @@ const requestPickup = asyncHandler(async (req, res) => {
 // @route   POST /api/places/request-delivery
 // @access  Private
 const requestDelivery = asyncHandler(async (req, res) => {
-   const {
-      lat,
-      lng,
-      address,
-      handling,
-      comments,
-      person,
-      name,
-      orderItems,
-   } = req.body
+   const { lat, lng, address, handling, comments, person, name, orderItems } =
+      req.body
 
    const location = {
       type: 'Point',

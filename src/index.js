@@ -19,6 +19,7 @@ import uploadRoutes from './routes/uploadRoutes.js'
 import placesRoutes from './routes/placesRoutes.js'
 import routeRoutes from './routes/routeRoutes.js'
 import stripeRoutes from './routes/stripeRoutes.js'
+import verificationRoutes from './routes/verificationRoutes.js'
 
 // dotenv.config()
 
@@ -52,6 +53,7 @@ app.use('/api/upload', uploadRoutes)
 app.use('/api/places', placesRoutes)
 app.use('/api/routes', routeRoutes)
 app.use('/api/stripe', stripeRoutes)
+app.use('/api/verification', verificationRoutes)
 
 // app.get('/api/config/paypal', (req, res) =>
 //   res.send(process.env.PAYPAL_CLIENT_ID)

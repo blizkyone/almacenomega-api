@@ -11,10 +11,14 @@ const userSchema = mongoose.Schema(
       },
       username: {
          type: String,
-         required: true,
-         unique: true,
+         // required: true,
+         sparse: true,
       },
       email: {
+         type: String,
+         sparse: true,
+      },
+      phone: {
          type: String,
          required: true,
          unique: true,
@@ -39,6 +43,12 @@ const userSchema = mongoose.Schema(
          type: String,
          required: true,
          default: moment().format('D'),
+      },
+      access: {
+         type: String,
+         enum: ['user', 'admin', 'ruta', 'bodega'],
+         required: true,
+         default: 'user',
       },
       isAdmin: {
          type: Boolean,

@@ -17,9 +17,11 @@ const authUser = asyncHandler(async (req, res) => {
          _id: user._id,
          name: user.name,
          email: user.email,
+         phone: user.phone,
          stripeId: user.stripeId,
          paymentMethod: user.paymentMethod,
          isAdmin: user.isAdmin,
+         access: user.access,
          token,
       })
       // res.json(user)
@@ -66,7 +68,7 @@ const validateUsername = asyncHandler(async (req, res) => {
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-   const { name, username, email, password } = req.body
+   const { name, email, password, phone } = req.body
 
    const userExists = await User.findOne({ email })
 
@@ -79,10 +81,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
    const user = await User.create({
       name,
-      username,
       email,
       password,
+      phone,
       stripeId: customer.id,
+      access: 'user',
    })
 
    if (user) {
@@ -94,6 +97,7 @@ const registerUser = asyncHandler(async (req, res) => {
          email: user.email,
          username: user.username,
          isAdmin: user.isAdmin,
+         access: user.access,
          token,
          // token: generateToken(user._id),
       })
@@ -115,6 +119,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
          name: user.name,
          email: user.email,
          isAdmin: user.isAdmin,
+         access: user.access,
       })
    } else {
       res.status(404)

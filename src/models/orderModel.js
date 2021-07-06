@@ -39,7 +39,6 @@ const orderSchema = mongoose.Schema(
       location: {
          type: pointSchema,
       },
-      naem: String,
       address: String,
       handling: {
          type: String,
