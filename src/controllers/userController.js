@@ -1,5 +1,5 @@
 import asyncHandler from 'express-async-handler'
-import generateToken from '../utils/generateToken.js'
+import validator from 'validator'
 import User from '../models/userModel.js'
 import stripe from '../config/stripe.js'
 
@@ -7,9 +7,14 @@ import stripe from '../config/stripe.js'
 // @route   POST /api/users/login
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
-   const { email, password } = req.body
+   const { id, password } = req.body
+   let user
 
-   const user = await User.findOne({ email })
+   if (validator.isEmail(id)) {
+      user = await User.findOne({ email: id })
+   } else {
+      user = await User.findOne({ phone: id })
+   }
 
    if (user && (await user.matchPassword(password))) {
       const token = await user.generateAuthToken()
@@ -27,7 +32,7 @@ const authUser = asyncHandler(async (req, res) => {
       // res.json(user)
    } else {
       res.status(401)
-      throw new Error('Invalid email or password')
+      throw new Error('Invalid identifier or password')
    }
 })
 
@@ -68,6 +73,7 @@ const validateUsername = asyncHandler(async (req, res) => {
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
+   console.log(req.body)
    const { name, email, password, phone } = req.body
 
    const userExists = await User.findOne({ email })
@@ -77,14 +83,14 @@ const registerUser = asyncHandler(async (req, res) => {
       throw new Error('User already exists')
    }
 
-   const customer = await stripe.customers.create({ name, email })
+   // const customer = await stripe.customers.create({ name, email })
 
    const user = await User.create({
       name,
       email,
       password,
       phone,
-      stripeId: customer.id,
+      // stripeId: customer.id,
       access: 'user',
    })
 
